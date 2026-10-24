@@ -13,6 +13,13 @@ export interface PluginNavEntry {
 }
 
 export const pluginNavEntries: PluginNavEntry[] = [
+  {
+    key: "monday",
+    label: "Monday board",
+    href: "/monday",
+    group: "Halcyon",
+    enabled: true,
+  },
   // Example (added by the `seo` plugin):
   // {
   //   key: "seo",

@@ -21,6 +21,8 @@ services:
     command: node packages/dashboard/.next/standalone/packages/dashboard/server.js
     port: 3000
     healthcheck: /api/health
+    env:
+      - WAREHOUSE_SCHEMA
     # Services are private by default — reaching this dashboard requires
     # Graphed authentication. Opt specific routes into public access
     # explicitly (e.g. webhooks), never the whole app:
