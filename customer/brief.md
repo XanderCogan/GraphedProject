@@ -6,7 +6,7 @@ Modeled on Graphed's own customer archetype: a founder-led Shopify DTC brand run
 
 - **What they sell:** non-alcoholic functional aperitifs (adaptogens, no sugar). Three SKUs at $38 to $42 per bottle, a 3-pack at $99, and a monthly subscription through Recharge at 15% off.
 - **Where:** Austin, TX. Ships US only. Shopify (not Plus). Launched 24 months ago.
-- **Size:** about $3.3M annualized run rate. Roughly 4,800 orders a month. AOV around $59. About a third of orders are subscription renewals.
+- **Size:** about $3.2M annualized run rate. Between 3,100 and 4,200 orders a month, growing. AOV around $71 including tax and shipping. Roughly 40% of orders are subscription renewals.
 - **Team:** founder (ex-CPG brand manager), one marketing manager who runs email and content, and a freelance media buyer who manages Meta for a flat monthly fee. No one technical in-house.
 - **Stack:** Shopify, Meta Ads, Google Ads (small, branded search only), GA4, Klaviyo, Recharge, Stripe via Shopify Payments, a Google Sheet the founder updates by hand every Monday.
 
@@ -21,7 +21,7 @@ Modeled on Graphed's own customer archetype: a founder-led Shopify DTC brand run
 
 ## The problem, in the founder's words
 
-"Our CAC on Meta went from about $40 in April to over $60 now. Same creative team, same media buyer, bigger budget. The media buyer says ROAS in Ads Manager is 3.5 to 4 so it's fine, but our bank account disagrees. Shopify says we're growing, Meta says we're growing, and I'm making less money. I don't know which number to trust and I don't have time to learn SQL. Can you just tell me what's actually happening and then make it stop?"
+"Our CAC on Meta went from about $36 in April to over $60 now. Same creative team, same media buyer, bigger budget. The media buyer says ROAS in Ads Manager is 3.5 to 4 so it's fine, but our bank account disagrees. Shopify says we're growing, Meta says we're growing, and I'm making less money. I don't know which number to trust and I don't have time to learn SQL. Can you just tell me what's actually happening and then make it stop?"
 
 ## What they asked for on the discovery call
 

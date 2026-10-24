@@ -151,7 +151,7 @@ for i in range(13800):
     c.first_order_at = created
     c.last_order_at = created + timedelta(days=int(rng.integers(0, max(1, days_back))))
     c.spent = round(c.orders * float(rng.normal(68, 14)), 2)
-    if rng.random() < 0.19:  # ~2,600 active subscribers at start
+    if rng.random() < 0.095:  # ~1,300 active subscribers at start
         c.subscriber = True
         c.sub_next = START + timedelta(days=int(rng.integers(0, 30)))
         c.sub_cycles = int(rng.integers(1, 9))
@@ -276,13 +276,13 @@ for d in DAYS:
     n_new_meta = int(rng.poisson(spend / true_new_cac_meta(d)))
     # Other new customers
     n_new_brand = int(rng.poisson(3.2 * dow_factor(d)))
-    n_new_organic = int(rng.poisson(4.8 * dow_factor(d) * (1 + 0.25 * f)))
+    n_new_organic = int(rng.poisson(4.4 * dow_factor(d) * (1 + 0.12 * f)))
     n_new_email = int(rng.poisson(1.1))
     n_new_infl = int(rng.poisson(2.4 if d.day in (3, 4, 5, 17, 18, 19) else 0.9))  # seeding drops
     n_new_leak = 0
     if d >= CODE_LEAK_FROM:
         ramp = min(1.0, (d - CODE_LEAK_FROM).days / 12)
-        n_new_leak = int(rng.poisson(14 * ramp * dow_factor(d)))
+        n_new_leak = int(rng.poisson(9 * ramp * dow_factor(d)))
 
     new_today: list[Order] = []
     def add_new(n: int, channel: str, adset_pool=None, code=None, pct=0.0):
@@ -290,7 +290,7 @@ for d in DAYS:
             created = datetime.combine(d, datetime.min.time()) + timedelta(seconds=int(rng.integers(0, 86400)))
             c = new_customer(created, channel)
             # Subscription take rate on first order
-            take = 0.30 if channel in ("meta", "organic", "google_brand", "email") else (0.12 if channel == "influencer" else 0.03)
+            take = 0.19 if channel in ("meta", "organic", "google_brand", "email") else (0.10 if channel == "influencer" else 0.03)
             if rng.random() < take:
                 c.subscriber = True
                 c.sub_next = d + timedelta(days=30)
