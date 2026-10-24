@@ -14,7 +14,7 @@ ORDER BY src, month;
 
 -- ---------------------------------------------------------------------------
 -- 1. Platform-reported purchases vs Shopify orders. A step change = a tracking event.
---    Healthy: ratio stable month to month. Halcyon: jumps ~0.40 -> ~0.58 in June.
+--    Healthy: ratio stable month to month. Halcyon: ~0.44 through May, ~0.58 in June, ~0.67 in July.
 -- ---------------------------------------------------------------------------
 WITH shop AS (
   SELECT toStartOfMonth(created_at) AS month, count() AS shop_orders, sum(total_price) AS shop_rev
@@ -74,34 +74,39 @@ FROM {s}.ga4_traffic_acquisition WHERE session_medium = 'paid_social'
 GROUP BY month, session_campaign ORDER BY session_campaign, month;
 
 -- The same from Shopify landing_site, which is the source of truth for what the ad actually sent.
+-- Landing sites are URL-encoded; after the rename the buyer switched to a {{campaign.name}} template,
+-- so the value is the Meta campaign name with brackets and pipes (%5BP%5D%20Prospecting%20%7C%20Broad).
 SELECT toStartOfMonth(created_at) AS month,
-       extractAll(landing_site, 'utm_campaign=([^&]+)')[1] AS utm_campaign, count() AS orders
+       decodeURLComponent(extractAll(landing_site, 'utm_campaign=([^&]+)')[1]) AS utm_campaign, count() AS orders
 FROM {s}.shopify_orders WHERE landing_site LIKE '%utm_campaign=%'
 GROUP BY month, utm_campaign ORDER BY utm_campaign, month;
 
 -- Mapping used for Halcyon (old -> current). Keep this in a project table, not in the chart code.
--- prospecting_broad_v1      -> p_prospecting_broad
--- prospecting_interests_v1  -> p_prospecting_interests
--- retargeting_warm_v1       -> r_retargeting_warm
--- retargeting_cart_v1       -> r_retargeting_cart
+-- prospecting_broad_v1      -> [P] Prospecting | Broad
+-- prospecting_interests_v1  -> [P] Prospecting | Interests
+-- retargeting_warm_v1       -> [R] Retargeting | Warm
+-- retargeting_cart_v1       -> [R] Retargeting | Cart
+-- Meta's own insights tables report the CURRENT name for all history, so join on campaign_id there.
 
 -- ---------------------------------------------------------------------------
 -- 5. Discount code leakage. Redemptions, AOV and referrer per code per month.
 -- ---------------------------------------------------------------------------
 SELECT toStartOfMonth(created_at) AS month, discount_code, count() AS orders,
        round(avg(total_price), 2) AS aov, round(sum(total_discounts), 0) AS discount_given,
-       countIf(referring_site LIKE '%retailmenot%' OR referring_site LIKE '%honey%') AS coupon_site_referrals,
+       countIf(multiSearchAny(referring_site, ['retailmenot', 'couponfollow', 'dealspotr', 'slickdeals'])) AS coupon_site_referrals,
        countIf(referring_site = '' OR referring_site IS NULL) AS direct
 FROM {s}.shopify_orders WHERE discount_code != '' AND discount_code IS NOT NULL
 GROUP BY month, discount_code ORDER BY discount_code, month;
 
 -- ---------------------------------------------------------------------------
 -- 6. Creative fatigue. Weekly frequency and CTR per ad vs the ad's first four weeks.
+--    Reach is not additive across days, so daily rows cannot give you a 7-day frequency
+--    (daily frequency on prospecting sits near 1.1 to 1.9 and tells you nothing). Use the
+--    weekly insights pull (time_increment=7), which the connector lands as meta_ads_insights_weekly.
 -- ---------------------------------------------------------------------------
 WITH weekly AS (
-  SELECT ad_id, ad_name, toStartOfWeek(date_start) AS week, sum(spend) AS spend, sum(impressions) AS imps,
-         sum(clicks) AS clicks, avg(frequency) AS freq, sum(purchases) AS purchases
-  FROM {s}.meta_ads_insights GROUP BY ad_id, ad_name, week
+  SELECT ad_id, ad_name, week_start AS week, spend, impressions AS imps, clicks, frequency AS freq, purchases
+  FROM {s}.meta_ads_insights_weekly
 ), base AS (
   SELECT ad_id, avg(clicks / imps) AS base_ctr FROM (
     SELECT ad_id, week, clicks, imps, row_number() OVER (PARTITION BY ad_id ORDER BY week) AS rn FROM weekly
@@ -119,7 +124,9 @@ FROM weekly w JOIN base b USING ad_id ORDER BY w.ad_name, w.week;
 WITH truth AS (
   SELECT toStartOfWeek(created_at, 1) AS week_of, count() AS orders, sum(total_price) AS rev FROM {s}.shopify_orders GROUP BY week_of
 )
-SELECT f.week_of, f.meta_spend, f.meta_purchases_reported, f.blended_cac_their_calc,
+-- Their "new customer CAC" divides Meta spend by ALL new customers, including organic and the
+-- coupon-leak buyers, which is why it barely moves while the Meta-only figure doubles.
+SELECT f.week_of, f.meta_spend, f.meta_purchases_reported, f.blended_cac_their_calc, f.meta_cac_new_their_calc,
        t.orders AS shopify_orders_true, f.shopify_orders AS shopify_orders_sheet,
        round(f.meta_spend / f.meta_purchases_reported, 2) AS their_cac_recomputed, f.notes
 FROM {s}.founder_monday_sheet f LEFT JOIN truth t ON t.week_of = f.week_of ORDER BY f.week_of;

@@ -52,6 +52,13 @@ TABLES: dict[str, str] = {
         landing_page_views bigint, add_to_cart bigint, initiate_checkout bigint,
         primary key (date_start, ad_id)
     """,
+    "meta_ads_insights_weekly": """
+        week_start date, week_end date, account_id text, campaign_id bigint, campaign_name text, adset_id bigint,
+        adset_name text, ad_id bigint, ad_name text, spend numeric(12,2), impressions bigint, reach bigint,
+        frequency numeric(6,2), clicks bigint, inline_link_clicks bigint, ctr numeric(8,4), purchases integer,
+        purchase_value numeric(12,2), purchase_roas numeric(10,4),
+        primary key (week_start, ad_id)
+    """,
     "google_ads_campaign_stats": """
         segments_date date, customer_id text, campaign_id bigint, campaign_name text, campaign_status text,
         advertising_channel_type text, metrics_cost_micros bigint, metrics_impressions bigint, metrics_clicks bigint,
@@ -71,9 +78,10 @@ TABLES: dict[str, str] = {
         primary key (date, message_name)
     """,
     "founder_monday_sheet": """
-        week_of date primary key, meta_spend numeric(12,2), google_spend numeric(12,2), meta_purchases_reported integer,
-        meta_roas_reported numeric(8,2), shopify_orders integer, shopify_revenue numeric(12,2),
-        blended_cac_their_calc numeric(10,2), notes text
+        week_of date primary key, meta_spend numeric(12,2), google_spend numeric(12,2), influencer_spend numeric(12,2),
+        meta_purchases_reported integer, meta_roas_reported numeric(8,2), shopify_orders integer,
+        shopify_revenue numeric(12,2), shopify_new_customers integer, blended_cac_their_calc numeric(10,2),
+        meta_cac_new_their_calc numeric(10,2), notes text
     """,
 }
 
