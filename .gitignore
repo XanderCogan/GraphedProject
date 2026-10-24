@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
+dist/
+__pycache__/
+*.pyc
+data/out/*.csv
+.graphed/
