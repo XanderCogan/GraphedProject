@@ -11,3 +11,7 @@ data/out/*.csv
 
 # Third-party course transcript: keep local, never publish
 Marketing Engineering Crash Course with Claude Code - transcript.txt
+
+# Practice and prep material: never published
+private/
+CLAUDE.local.md
