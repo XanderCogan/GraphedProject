@@ -6,6 +6,10 @@ Usage:
     python data/load_supabase.py --drop     # drop and recreate the schema first
 
 Graphed's Postgres connector then syncs these tables into the warehouse.
+
+Uses psycopg when it can load; falls back to pg8000 (pure Python) on machines
+where the psycopg binary is blocked. Both go through COPY, so the load is fast
+either way. Use the Supabase *session pooler* URI: the direct host is IPv6-only.
 """
 from __future__ import annotations
 
@@ -14,8 +18,6 @@ import csv
 import os
 import sys
 from pathlib import Path
-
-import psycopg
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "out"
@@ -99,34 +101,93 @@ def read_env() -> str:
     return url
 
 
+class Db:
+    """Minimal driver shim: run(sql), copy_csv(sql, fileobj), one(sql) -> first value."""
+
+    def __init__(self, url: str) -> None:
+        self.kind = "psycopg"
+        try:
+            import psycopg  # type: ignore
+
+            self.conn = psycopg.connect(url, autocommit=False)
+            self.cur = self.conn.cursor()
+        except ImportError:
+            self.kind = "pg8000"
+            import re
+
+            import scramp  # type: ignore
+
+            if not hasattr(scramp, "make_channel_binding"):  # scramp 1.5 + pg8000 1.31 on Windows
+                scramp.make_channel_binding = lambda name, sock: None  # SCRAM without channel binding
+            import pg8000.native  # type: ignore
+
+            m = re.match(r"postgres(?:ql)?://([^:]+):(.*)@([^/:]+)(?::(\d+))?/([^?]*)", url)
+            if not m:
+                sys.exit("SUPABASE_DB_URL is not a postgresql://user:password@host:port/db URI")
+            user, pw, host, port, db = m.groups()
+            self.conn = pg8000.native.Connection(
+                user=user, password=pw, host=host, port=int(port or 5432), database=db or "postgres",
+                ssl_context=True, timeout=30,
+            )
+            self.conn.run("begin")
+            print(f"  (psycopg unavailable; using pg8000 via {host})")
+
+    def run(self, sql: str) -> None:
+        if self.kind == "psycopg":
+            self.cur.execute(sql)
+        else:
+            self.conn.run(sql)
+
+    def one(self, sql: str):
+        if self.kind == "psycopg":
+            self.cur.execute(sql)
+            return self.cur.fetchone()[0]
+        return self.conn.run(sql)[0][0]
+
+    def copy_csv(self, sql: str, fh) -> None:
+        if self.kind == "psycopg":
+            with self.cur.copy(sql) as cp:
+                while chunk := fh.read(1 << 20):
+                    cp.write(chunk)
+        else:
+            self.conn.run(sql, stream=fh)
+
+    def commit(self) -> None:
+        if self.kind == "psycopg":
+            self.conn.commit()
+        else:
+            self.conn.run("commit")
+
+    def close(self) -> None:
+        self.conn.close()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--drop", action="store_true", help="drop and recreate the schema")
     args = ap.parse_args()
 
-    url = read_env()
-    with psycopg.connect(url, autocommit=False) as conn:
-        with conn.cursor() as cur:
-            if args.drop:
-                cur.execute(f"drop schema if exists {SCHEMA} cascade")
-            cur.execute(f"create schema if not exists {SCHEMA}")
-            for table, ddl in TABLES.items():
-                cur.execute(f"drop table if exists {SCHEMA}.{table}")
-                cur.execute(f"create table {SCHEMA}.{table} ({ddl})")
-                path = OUT / f"{table}.csv"
-                with path.open("r", encoding="utf-8", newline="") as fh:
-                    header = next(csv.reader(fh))
-                    fh.seek(0)
-                    cols = ", ".join(header)
-                    with cur.copy(f"copy {SCHEMA}.{table} ({cols}) from stdin with (format csv, header true, null '')") as cp:
-                        while chunk := fh.read(1 << 20):
-                            cp.write(chunk)
-                cur.execute(f"select count(*) from {SCHEMA}.{table}")
-                n = cur.fetchone()[0]
-                print(f"  {table:32s} {n:>8,} rows")
-            # Read-only role for the warehouse connector, if the operator wants one
-            cur.execute(f"grant usage on schema {SCHEMA} to postgres")
-        conn.commit()
+    db = Db(read_env())
+    try:
+        if args.drop:
+            db.run(f"drop schema if exists {SCHEMA} cascade")
+        db.run(f"create schema if not exists {SCHEMA}")
+        for table, ddl in TABLES.items():
+            db.run(f"drop table if exists {SCHEMA}.{table}")
+            db.run(f"create table {SCHEMA}.{table} ({ddl})")
+            path = OUT / f"{table}.csv"
+            with path.open("r", encoding="utf-8", newline="") as fh:
+                header = next(csv.reader(fh))
+                fh.seek(0)
+                cols = ", ".join(header)
+                db.copy_csv(f"copy {SCHEMA}.{table} ({cols}) from stdin with (format csv, header true, null '')", fh)
+            n = db.one(f"select count(*) from {SCHEMA}.{table}")
+            print(f"  {table:32s} {n:>8,} rows")
+        # Read-only role for the warehouse connector, if the operator wants one
+        db.run(f"grant usage on schema {SCHEMA} to postgres")
+        db.commit()
+    finally:
+        db.close()
     print("done")
 
 
