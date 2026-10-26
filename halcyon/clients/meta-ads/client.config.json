@@ -19,7 +19,7 @@
     "lookback_weeks": 8
   },
   "agent": {
-    "model": "openai/gpt-4o-mini",
+    "model": "openai/gpt-4.1",
     "max_recommendations": 8
   },
   "notes": {
