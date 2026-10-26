@@ -8,3 +8,4 @@ dist/
 # purpose — it only holds the account id linking this repo to Graphed.)
 .graphed/plugins
 *.tsbuildinfo
+packages/dashboard/next-env.d.ts

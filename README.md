@@ -31,7 +31,7 @@ The founder's spreadsheet is in the data too, with their arithmetic, so the dash
 | `data/generator/generate.py` | Deterministic generator for 24 months of Shopify history and 7 months of Meta, Google Ads, GA4, Klaviyo and spreadsheet exports. |
 | `data/realism-audit.md` | 31 ways the first version would have been spotted as synthetic, and what changed. |
 | `data/load_supabase.py` | Loads the CSVs into Postgres, which Graphed's Postgres connector syncs into the warehouse. |
-| `halcyon/` | The Graphed Cloud project. `packages/core/src/warehouse.ts` holds every query. `packages/dashboard/app/monday/` is the board. |
+| `halcyon/` | The Graphed Cloud project. `packages/core/src/warehouse.ts` holds every query. `packages/dashboard/app/monday/` is the board. `packages/core/src/meta-ads/` is the agent. |
 
 ## The Monday board
 
@@ -44,6 +44,17 @@ Six panels in the order the founder will read them, each naming the table it cam
 5. FERN20 redemptions per week with coupon-site referrals.
 6. Orders by utm_campaign showing each campaign under two names.
 
+## The Meta ads agent
+
+Graphed's registry has SEO, Google Ads and outbound kits but no Meta kit, so this one is built into the project on the Google Ads kit's shape. A cron job runs every morning at 8:00 Central:
+
+1. Reads the weekly Meta insights for prospecting campaigns only (`[P]` prefix; `[R]` retargeting is excluded on purpose, because its purchases are mostly subscription renewals).
+2. Applies fixed rules from `halcyon/clients/meta-ads/client.config.json`: fatigue is 7-day frequency over 3.5 with CTR under 60% of the ad's first four weeks; scaling into fatigue is that plus spend up more than 10% week over week; CPA drift is reported cost per purchase above 1.5x the ad's prior median.
+3. Hands the findings, as JSON, to an LLM through Graphed's OpenRouter proxy. The model writes the media buyer a note and orders the actions. It cannot add findings or change numbers, and if it is unavailable the run still completes with a rule-generated note.
+4. Stores the run and ranked recommendations in the project's Postgres. The dashboard page at `/meta-ads` shows the note, the recommendations with the evidence behind each, and every run including failures.
+
+It recommends and never writes to Meta: there is no Meta credential on the project and `writes.enabled` is false. Turning writes on is a config change a human makes after the credential exists, one permission at a time.
+
 ## Run it
 
 ```bash
@@ -54,17 +65,18 @@ python data/load_supabase.py --drop
 
 # Graphed: connect the Supabase Postgres as a source in the Graphed app, then
 graphed sources list            # note the schema_name for the halcyon tables
-graphed secrets set WAREHOUSE_SCHEMA --project halcyon-botanicals
+graphed secrets set WAREHOUSE_SCHEMA --value <schema_name> --project halcyon-botanicals
 
 # Dashboard
 cd halcyon && npm install
 graphed dev run -- npm run dev  # local, with warehouse credentials injected
 graphed deploy                  # cloud, private behind the Graphed gateway
+graphed jobs run meta-ads-daily # first agent run; then open /meta-ads
 ```
 
 ## What I'd do next with a real customer
 
-- Flip the Facebook Ads agent from recommend to act, one permission at a time, starting with pausing fatigued ads.
+- Add the Meta Marketing API credential and flip the agent from recommend to act, one permission at a time, starting with capping budget on fatigued ads.
 - Run the static-ads skill against the three angles the current creative doesn't cover.
 - Load the founder's actual Google Sheet through the Sheets connector so the reconciliation panel runs on their live spreadsheet.
 - Send `graphed feedback` for the gaps I hit: no 7-day frequency without a separate weekly pull, and no campaign-rename history in the Meta tables.

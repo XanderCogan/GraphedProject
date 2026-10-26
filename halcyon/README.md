@@ -13,6 +13,7 @@ npm install                   # one install for all packages (npm workspaces)
 npm run db:migrate            # apply packages/core/src/migrations/*.ts
 npm run dev                   # dashboard on http://localhost:3000
 npm run job:example-daily     # run the cron job against the same local DB
+graphed dev run -- npm run job:meta-ads-daily   # the agent, with warehouse + LLM credentials injected
 ```
 
 `graphed init` already wrote a `.env` with the local `DATABASE_URL`. Reset
@@ -26,6 +27,12 @@ graphed deploy
 
 The first deploy provisions the `primary` database and wires `DATABASE_URL`
 into every service/job. Follow progress with `graphed logs --follow`.
+
+## What runs here
+
+- `dashboard` service: the Monday board at `/monday` and the agent page at `/meta-ads`. Both read the warehouse schema named by the `WAREHOUSE_SCHEMA` secret.
+- `meta-ads-daily` job (8:00 America/Chicago): the Meta ads agent in `packages/core/src/meta-ads/`. Scope and thresholds live in `clients/meta-ads/client.config.json`. Recommend-only; `writes.enabled` stays false until a Meta credential exists.
+- `example-daily` job: the scaffold's heartbeat, left in place.
 
 ## Add capabilities
 
@@ -49,6 +56,8 @@ packages/
     src/migrations/         # numbered TS migrations (up/down), run by `npm run db:migrate`
     src/db/                 # getDb() + the single Database type registry
     src/config.ts           # env loading (.env walk-up) + zod-validated config
+    src/warehouse.ts        # the Monday board's seven ClickHouse queries
+    src/meta-ads/           # the agent: config, warehouse reads, rules, brief, store, run
   jobs/                     # @app/jobs — cron entrypoints, one thin file per job
   dashboard/                # @app/dashboard — Next.js App Router
     app/                    # routes; one folder per capability
