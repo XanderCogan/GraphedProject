@@ -3,7 +3,9 @@ import { inScope, type MetaAdsClientConfig } from "./config";
 
 // Everything the agent knows comes from these reads. Dates are anchored on the
 // latest day the connector has synced, not on the wall clock, so a lagging
-// sync reads as "data through Tuesday", never as a spend collapse.
+// sync reads as "data through Tuesday", never as a spend collapse. Only full
+// seven-day buckets are evaluated: a bucket whose seventh day is after the
+// sync date is in progress, whatever its week_end column says.
 
 export function num(value: unknown): number {
   if (value === null || value === undefined || value === "") return 0;
@@ -60,7 +62,7 @@ export async function loadSnapshot(config: MetaAdsClientConfig): Promise<Snapsho
             toString(toDate(week_start)) AS week_start, toString(toDate(week_end)) AS week_end,
             spend, impressions, reach, clicks, frequency, purchases, purchase_value
      FROM {s}.meta_ads_insights_weekly
-     WHERE toDate(week_end) <= toDate(%(asof)s)
+     WHERE toDate(week_start) + 6 <= toDate(%(asof)s)
        AND toDate(week_start) >= toDate(%(asof)s) - ${lookbackDays}
      ORDER BY week_start, spend DESC`,
     { asof: asOf },
