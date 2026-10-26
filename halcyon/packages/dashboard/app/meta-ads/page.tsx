@@ -202,6 +202,7 @@ export default async function MetaAdsPage() {
                       <TableHead className="text-right">Freq</TableHead>
                       <TableHead className="text-right">CTR vs launch</TableHead>
                       <TableHead className="text-right">Rep. CPA</TableHead>
+                      <TableHead>Since</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -231,6 +232,11 @@ export default async function MetaAdsPage() {
                             {e.ctr_vs_launch_pct === null || e.ctr_vs_launch_pct === undefined ? "" : `${e.ctr_vs_launch_pct}%`}
                           </TableCell>
                           <TableCell className="align-top text-right tabular-nums">{money(Number(e.reported_cpa ?? 0))}</TableCell>
+                          <TableCell className="align-top text-xs text-muted-foreground tabular-nums">
+                            {e.first_fatigued_week
+                              ? `${e.first_fatigued_week}${e.weeks_fatigued ? ` (${e.weeks_fatigued} wk)` : ""}`
+                              : ""}
+                          </TableCell>
                         </TableRow>
                       );
                     })}

@@ -12,7 +12,7 @@ docker compose up -d          # local Postgres on :5432
 npm install                   # one install for all packages (npm workspaces)
 npm run db:migrate            # apply packages/core/src/migrations/*.ts
 npm run dev                   # dashboard on http://localhost:3000
-npm run job:example-daily     # run the cron job against the same local DB
+npm test                      # rule and note-guard tests, no database needed
 graphed dev run -- npm run job:meta-ads-daily   # the agent, with warehouse + LLM credentials injected
 ```
 
@@ -32,7 +32,6 @@ into every service/job. Read logs with `graphed logs --service dashboard` or `gr
 
 - `dashboard` service: the Monday board at `/monday` and the agent page at `/meta-ads`. Both read the warehouse schema named by the `WAREHOUSE_SCHEMA` secret.
 - `meta-ads-daily` job (8:00 America/Chicago): the Meta ads agent in `packages/core/src/meta-ads/`. Scope and thresholds live in `clients/meta-ads/client.config.json`. Recommend-only; `writes.enabled` stays false until a Meta credential exists.
-- `example-daily` job: the scaffold's heartbeat, left in place.
 
 ## Add capabilities
 

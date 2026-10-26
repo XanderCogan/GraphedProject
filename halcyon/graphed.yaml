@@ -31,13 +31,6 @@ services:
     #       - ^/api/webhooks/.*
 
 jobs:
-  example-daily:
-    command: npm run job:example-daily
-    schedule:
-      cron: 0 13 * * *
-      timezone: America/New_York
-    timeout_seconds: 900
-    retries: 1
   # Meta ads agent: reads the warehouse, applies the fatigue and CPA rules to
   # prospecting campaigns only, writes a brief and ranked recommendations.
   # Never writes to Meta. Not idempotent (one run row per execution), so no

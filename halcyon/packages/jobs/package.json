@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "job:example-daily": "tsx src/example-daily.ts",
     "job:meta-ads-daily": "tsx src/meta-ads-daily.ts"
   },
   "dependencies": {

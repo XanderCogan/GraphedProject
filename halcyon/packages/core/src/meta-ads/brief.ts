@@ -68,7 +68,16 @@ export function thinNote(note: string, summary: AccountSummary, findings: Findin
   }
   const missing = findings.filter((f) => !lower.includes(f.adName.toLowerCase()));
   if (missing.length > 0) return `does not mention ${missing.map((f) => f.adName).join(", ")}`;
-  if (findings.length > 0 && !/\d/.test(note)) return "contains no numbers";
+  if (findings.length > 0) {
+    // Dates do not count as evidence: strip the week and sync date, then look for a figure.
+    let rest = note;
+    for (const d of [summary.latestWeek, summary.asOf]) {
+      if (!d) continue;
+      rest = rest.split(d).join(" ").replace(new RegExp(weekWords(d), "ig"), " ");
+    }
+    rest = rest.replace(/(19|20)\d\d/g, " ");
+    if (!/\d/.test(rest)) return "contains no numbers";
+  }
   return null;
 }
 
