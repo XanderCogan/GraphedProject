@@ -45,6 +45,19 @@ async function run<T extends object>(
   return results;
 }
 
+/** The warehouse schema in use, for modules that build their own queries. */
+export function warehouseSchema(): string {
+  return schemaName();
+}
+
+/** Run a read-only query with `{s}` replaced by the warehouse schema. */
+export async function warehouseQuery<T extends object>(
+  sql: string,
+  parameters: Record<string, string> = {},
+): Promise<T[]> {
+  return run<T>(sql, parameters);
+}
+
 // Window: the platform exports start on this date (connector backfill window).
 export const WINDOW_START = "2026-04-01";
 export const PIXEL_STEP_DATE = "2026-06-12";

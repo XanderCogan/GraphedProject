@@ -26,3 +26,9 @@ export type {
   WeeklyCodeRow,
   WeeklyOrderMixRow,
 } from "./warehouse";
+export { loadMetaAdsConfig, inScope } from "./meta-ads/config";
+export type { MetaAdsClientConfig } from "./meta-ads/config";
+export { ACTION_LABELS } from "./meta-ads/rules";
+export type { AccountSummary, Finding } from "./meta-ads/rules";
+export { latestRun as latestMetaAdsRun, listRuns as listMetaAdsRuns } from "./meta-ads/store";
+export { runMetaAdsAgent } from "./meta-ads/run";

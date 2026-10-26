@@ -1,5 +1,7 @@
 import type { Generated } from "kysely";
 
+import type { MetaAdsRecommendationsTable, MetaAdsRunsTable } from "../meta-ads/tables";
+
 export interface ExampleHeartbeatsTable {
   id: Generated<number>;
   message: string;
@@ -12,4 +14,6 @@ export interface ExampleHeartbeatsTable {
 // which is intentionally not part of this schema.)
 export interface Database {
   example_heartbeats: ExampleHeartbeatsTable;
+  meta_ads_runs: MetaAdsRunsTable;
+  meta_ads_recommendations: MetaAdsRecommendationsTable;
 }

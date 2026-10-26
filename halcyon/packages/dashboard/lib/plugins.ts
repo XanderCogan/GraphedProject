@@ -20,6 +20,13 @@ export const pluginNavEntries: PluginNavEntry[] = [
     group: "Halcyon",
     enabled: true,
   },
+  {
+    key: "meta-ads",
+    label: "Meta ads agent",
+    href: "/meta-ads",
+    group: "Agents",
+    enabled: true,
+  },
   // Example (added by the `seo` plugin):
   // {
   //   key: "seo",

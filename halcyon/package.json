@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "npm run -w @app/core db:migrate",
     "db:reset": "docker compose down -v && docker compose up -d && sleep 2 && npm run db:migrate",
-    "job:example-daily": "npm run -w @app/jobs job:example-daily"
+    "job:example-daily": "npm run -w @app/jobs job:example-daily",
+    "job:meta-ads-daily": "npm run -w @app/jobs job:meta-ads-daily"
   },
   "dependencies": {
     "tsx": "^4.19.2"

@@ -38,3 +38,16 @@ jobs:
       timezone: America/New_York
     timeout_seconds: 900
     retries: 1
+  # Meta ads agent: reads the warehouse, applies the fatigue and CPA rules to
+  # prospecting campaigns only, writes a brief and ranked recommendations.
+  # Never writes to Meta. Not idempotent (one run row per execution), so no
+  # retries; a failed run stays visible on the /meta-ads page.
+  meta-ads-daily:
+    command: npm run job:meta-ads-daily
+    schedule:
+      cron: 0 8 * * *
+      timezone: America/Chicago
+    timeout_seconds: 900
+    retries: 0
+    env:
+      - WAREHOUSE_SCHEMA
