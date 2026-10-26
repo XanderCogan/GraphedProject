@@ -39,7 +39,7 @@ The rule underneath all of it: **find what's wrong with the numbers before you t
 ## Day 4: findings call and agent scope
 
 - Thirty minutes. Walk the dashboard top to bottom. Each panel is one finding and one fix.
-- Agree the scope for the first agent in writing. For a Meta-heavy DTC brand that's almost always the Facebook Ads agent, read-only, scoped to prospecting campaigns, with a frequency ceiling and a CTR floor taken from the fatigue table.
+- Agree the scope for the first agent in writing. For a Meta-heavy DTC brand that's almost always a Meta ads agent, read-only, scoped to prospecting campaigns, with a frequency ceiling and a CTR floor taken from the fatigue table. As of October 2026 the registry has Google Ads, SEO and outbound kits but no Meta kit, so this one is built into the project on the Google Ads kit's shape (see `halcyon/packages/core/src/meta-ads/`).
 - Agree what the agent is not allowed to touch. Retargeting, budgets above a cap, anything with the subscription offer.
 - Send the fix list to the media buyer: remove the duplicate pixel, add event deduplication, stop scaling the fatigued ad, kill the leaked code and reissue.
 
@@ -47,7 +47,7 @@ The rule underneath all of it: **find what's wrong with the numbers before you t
 
 ## Day 5: first agent live
 
-- `graphed plugins add <agent>` and follow the staged `AGENT.md`. Set secrets with `graphed secrets set`. Never in files.
+- `graphed plugins add <agent>` and follow the staged `AGENT.md` when a kit exists; otherwise build it into the project on the nearest kit's shape. Set secrets with `graphed secrets set`. Never in files.
 - Run read-only for the first week: the agent writes recommendations to the dashboard, a human applies them.
 - Schedule the daily job. Confirm the first run in `graphed logs`.
 - Send the one-page findings note (05) with the dashboard link and the agent's first recommendation.

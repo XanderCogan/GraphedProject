@@ -121,7 +121,7 @@ export default async function MetaAdsPage() {
               </li>
               <li>
                 <span className="font-medium">CPA drift:</span> reported cost per purchase above {t.cpa_drift_multiple}x the
-                ad&apos;s prior-week median.
+                median of the ad&apos;s prior {t.lookback_weeks} weeks.
               </li>
               <li>
                 <span className="font-medium">Ignored:</span> ads under {money(t.min_weekly_spend)} a week. Frequency comes

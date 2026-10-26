@@ -189,8 +189,8 @@ export function evaluate(
         ...common,
         rationale:
           `Reported cost per purchase is $${round(cpa, 0)} this week against a median of $${round(med, 0)} ` +
-          `over the prior ${priorCpas.length} weeks (${t.cpa_drift_multiple}x limit). Meta's purchase count ` +
-          `includes the duplicate pixel since Jun 12, so the true number is worse.`,
+          `over the prior ${priorCpas.length} weeks (${t.cpa_drift_multiple}x limit).` +
+          (config.notes.cpa_caveat ? ` ${config.notes.cpa_caveat}` : ""),
         evidence: { ...evidence, prior_median_cpa: round(med) },
       });
     }

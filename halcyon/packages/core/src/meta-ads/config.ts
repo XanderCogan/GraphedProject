@@ -29,6 +29,13 @@ const configSchema = z.object({
     model: z.string().min(1),
     max_recommendations: z.number().int().min(1).max(50),
   }),
+  notes: z
+    .object({
+      // Appended to every CPA finding. Client-specific context the rules
+      // should not hard-code, e.g. a known over-count in Meta's purchases.
+      cpa_caveat: z.string().default(""),
+    })
+    .default({}),
   writes: z.object({
     // Always false for now: there is no Meta Marketing API credential on this
     // project, so every recommendation is for the media buyer to apply.

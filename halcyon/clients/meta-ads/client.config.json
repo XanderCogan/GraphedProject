@@ -3,8 +3,12 @@
   "display_name": "Halcyon Botanicals",
   "product_one_liner": "Non-alcoholic functional aperitifs sold DTC on Shopify; Meta is the only prospecting channel.",
   "scope": {
-    "include_campaign_prefixes": ["[P] "],
-    "exclude_campaign_prefixes": ["[R] "]
+    "include_campaign_prefixes": [
+      "[P] "
+    ],
+    "exclude_campaign_prefixes": [
+      "[R] "
+    ]
   },
   "thresholds": {
     "frequency_max": 3.5,
@@ -17,6 +21,9 @@
   "agent": {
     "model": "openai/gpt-4o-mini",
     "max_recommendations": 8
+  },
+  "notes": {
+    "cpa_caveat": "Meta's purchase count has included a duplicate pixel since Jun 12, so the true cost per purchase is higher than reported."
   },
   "writes": {
     "enabled": false

@@ -60,10 +60,12 @@ It recommends and never writes to Meta: there is no Meta credential on the proje
 ```bash
 # Data
 python data/generator/generate.py
-cp .env.example .env            # SUPABASE_DB_URL, GRAPHED_TOKEN
+cp .env.example .env            # SUPABASE_DB_URL (session pooler; the direct host is IPv6-only)
 python data/load_supabase.py --drop
 
-# Graphed: connect the Supabase Postgres as a source in the Graphed app, then
+# Graphed: connect the Postgres source in the Graphed app with a read-only role
+# that can see only the halcyon schema. Fivetran syncs every schema the login
+# can see, and the setup flow does not reliably ask which one. Then:
 graphed sources list            # note the schema_name for the halcyon tables
 graphed secrets set WAREHOUSE_SCHEMA --value <schema_name> --project halcyon-botanicals
 
@@ -79,4 +81,4 @@ graphed jobs run meta-ads-daily # first agent run; then open /meta-ads
 - Add the Meta Marketing API credential and flip the agent from recommend to act, one permission at a time, starting with capping budget on fatigued ads.
 - Run the static-ads skill against the three angles the current creative doesn't cover.
 - Load the founder's actual Google Sheet through the Sheets connector so the reconciliation panel runs on their live spreadsheet.
-- Send `graphed feedback` for the gaps I hit: no 7-day frequency without a separate weekly pull, and no campaign-rename history in the Meta tables.
+- Send `graphed feedback` for the gaps I hit: no Meta ads kit in the plugin registry, no 7-day frequency without a separate weekly pull, and no campaign-rename history in the Meta tables.

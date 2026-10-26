@@ -26,7 +26,7 @@ graphed deploy
 ```
 
 The first deploy provisions the `primary` database and wires `DATABASE_URL`
-into every service/job. Follow progress with `graphed logs --follow`.
+into every service/job. Read logs with `graphed logs --service dashboard` or `graphed logs --job meta-ads-daily`.
 
 ## What runs here
 

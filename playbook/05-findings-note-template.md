@@ -59,7 +59,7 @@ We measured Meta spend divided by the customers Meta actually brought in: about 
 ### What's now running
 
 - Dashboard: private link. Panels follow the five findings in order.
-- Facebook Ads agent, scoped to the two prospecting campaigns, read-only. It flags any ad above frequency 3.5 with CTR down 40% from launch, and recommends budget shifts daily.
+- Meta ads agent, scoped to the two prospecting campaigns, read-only. Every morning it flags any ad above 7-day frequency 3.5 with CTR under 60% of its launch level, or with cost per purchase 1.5x its recent median, and writes the media buyer a ranked note at `/meta-ads`.
 
 ### What we need from you
 

@@ -34,7 +34,7 @@ Connect in this order and don't move on until the row shows a schema name:
 5. Google Ads.
 6. Google Sheets, pointed at the founder's spreadsheet. Yes, really. Loading their spreadsheet into the warehouse is how you show them, in one query, exactly where their number diverges from the truth.
 
-For a customer whose data isn't in a supported source yet, or for a sandbox, the Postgres connector takes any table you can write. That's how this work sample's Halcyon data was loaded.
+For a customer whose data isn't in a supported source yet, or for a sandbox, the Postgres connector takes any table you can write. That's how this work sample's Halcyon data was loaded. Give the connector a read-only role that can see only the schema you want synced: Fivetran copies every schema the login can read, and the setup flow does not reliably ask which. The first Halcyon sync pulled Supabase's internal auth schema instead of the data because the login was the superuser.
 
 ## First hour after sync: five checks before you trust any number
 
