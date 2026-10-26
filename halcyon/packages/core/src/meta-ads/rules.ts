@@ -173,8 +173,11 @@ export function evaluate(
       });
     }
 
-    const priorCpas = rows
-      .filter((r) => r.weekStart !== latestWeek && r.purchases > 0 && r.spend >= t.min_weekly_spend)
+    // CPA drift compares against the recent past only; fatigue history above
+    // uses every week so "first fatigued on" is the real onset.
+    const recent = rows.filter((r) => r.weekStart < latest.weekStart).slice(-t.lookback_weeks);
+    const priorCpas = recent
+      .filter((r) => r.purchases > 0 && r.spend >= t.min_weekly_spend)
       .map((r) => r.spend / r.purchases);
     const med = median(priorCpas);
     if (med !== null && priorCpas.length >= 3 && cpa > t.cpa_drift_multiple * med) {

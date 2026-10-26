@@ -5,7 +5,9 @@ import { inScope, type MetaAdsClientConfig } from "./config";
 // latest day the connector has synced, not on the wall clock, so a lagging
 // sync reads as "data through Tuesday", never as a spend collapse. Only full
 // seven-day buckets are evaluated: a bucket whose seventh day is after the
-// sync date is in progress, whatever its week_end column says.
+// sync date is in progress, whatever its week_end column says. The weekly
+// table is small (one row per ad per week), so the full history is read and
+// the rules decide how far back each comparison looks.
 
 export function num(value: unknown): number {
   if (value === null || value === undefined || value === "") return 0;
@@ -55,15 +57,12 @@ export async function loadSnapshot(config: MetaAdsClientConfig): Promise<Snapsho
     `SELECT toString(max(toDate(date_start))) AS as_of FROM {s}.meta_ads_insights`,
   );
   const asOf = String(as_of);
-  const lookbackDays = config.thresholds.lookback_weeks * 7;
-
   const weeklyRaw = await warehouseQuery<Record<string, unknown>>(
     `SELECT toString(ad_id) AS ad_id, ad_name, adset_name, campaign_name,
             toString(toDate(week_start)) AS week_start, toString(toDate(week_end)) AS week_end,
             spend, impressions, reach, clicks, frequency, purchases, purchase_value
      FROM {s}.meta_ads_insights_weekly
      WHERE toDate(week_start) + 6 <= toDate(%(asof)s)
-       AND toDate(week_start) >= toDate(%(asof)s) - ${lookbackDays}
      ORDER BY week_start, spend DESC`,
     { asof: asOf },
   );
