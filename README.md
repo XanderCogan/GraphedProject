@@ -31,7 +31,8 @@ The founder's spreadsheet is in the data too, with their arithmetic, so the dash
 | `data/generator/generate.py` | Deterministic generator for 24 months of Shopify history and 7 months of Meta, Google Ads, GA4, Klaviyo and spreadsheet exports. |
 | `data/realism-audit.md` | 31 ways the first version would have been spotted as synthetic, and what changed. |
 | `data/load_supabase.py` | Loads the CSVs into Postgres, which Graphed's Postgres connector syncs into the warehouse. |
-| `halcyon/` | The Graphed Cloud project. `packages/core/src/warehouse.ts` holds every query. `packages/dashboard/app/monday/` is the board. `packages/core/src/meta-ads/` is the agent. |
+| `halcyon/` | The Graphed Cloud project. `packages/core/src/warehouse.ts` holds every query. `packages/dashboard/app/monday/` is the board. `packages/core/src/meta-ads/` is the agent. `clients/static-ads/` is the creative. |
+| `customer/findings-note.md` | The one-page note to the founder, every number from the live warehouse. |
 
 ## The Monday board
 
@@ -54,6 +55,10 @@ Graphed's registry has SEO, Google Ads and outbound kits but no Meta kit, so thi
 4. Stores the run and ranked recommendations in the project's Postgres. The dashboard page at `/meta-ads` shows the note, the recommendations with the evidence behind each, and every run including failures.
 
 It recommends and never writes to Meta: there is no Meta credential on the project and `writes.enabled` is false. Turning writes on is a config change a human makes after the credential exists, one permission at a time.
+
+## The static ads
+
+Five 1080x1350 statics for prospecting, each aimed at something none of the account's 17 ads say to a cold audience: a sugar comparison with wine, the subscription offer, the 3-pack as a host gift, price per glass against a bar, and the next morning without a medical claim. Style guide, ideas, prompts and finals are in `halcyon/clients/static-ads/`. Generated with GPT Image 2 through Graphed Tools and recorded in the project's `skill_asset` table so a later agent can find them in project storage. The review notes in `ideas.md` list what the model got wrong and how it was fixed.
 
 ## Run it
 
@@ -79,6 +84,6 @@ graphed jobs run meta-ads-daily # first agent run; then open /meta-ads
 ## What I'd do next with a real customer
 
 - Add the Meta Marketing API credential and flip the agent from recommend to act, one permission at a time, starting with capping budget on fatigued ads.
-- Run the static-ads skill against the three angles the current creative doesn't cover.
+- Put the five statics into a new prospecting ad set at a small budget and let the agent's fatigue rules judge them against Golden Hour.
 - Load the founder's actual Google Sheet through the Sheets connector so the reconciliation panel runs on their live spreadsheet.
 - Send `graphed feedback` for the gaps I hit: no Meta ads kit in the plugin registry, no 7-day frequency without a separate weekly pull, and no campaign-rename history in the Meta tables.

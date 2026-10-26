@@ -9,3 +9,6 @@ dist/
 .graphed/plugins
 *.tsbuildinfo
 packages/dashboard/next-env.d.ts
+clients/static-ads/ads/*.preview.jpg
+clients/static-ads/ads/*.log
+clients/static-ads/ads/*.v1*
