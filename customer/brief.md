@@ -1,6 +1,6 @@
 # Customer brief: Halcyon Botanicals (fictional)
 
-Modeled on Graphed's own customer archetype: a founder-led Shopify DTC brand running most of its growth on Meta, like the sunflowersober.com testimonial ("deployed four agents in under an hour... paid ads, content, and SEO"). Halcyon is invented. Nothing here describes a real company.
+A founder-led Shopify DTC brand running most of its growth on Meta, with no one technical in-house. Halcyon is invented. Nothing here describes a real company.
 
 ## Who they are
 
